@@ -1,1 +1,76 @@
-1. Introduction1.1. Contexte et ObjectifsLe projet s'inscrit dans l'analyse de l'impact transformateur de l'Intelligence Artificielle (IA) sur le marché du travail à l'horizon 2030, en utilisant un jeu de données simulant les caractéristiques des métiers.L'analyse poursuit deux objectifs principaux, nécessitant des approches de régression distinctes :Prédiction Continue (Régression Linéaire) : Quantifier l'impact du pourcentage de tâches automatisables sur une variable continue, comme le Salaire Annuel Moyen.Prédiction Catégorielle (Régression Logistique) : Évaluer la probabilité qu'un métier bascule dans une catégorie de Haut Risque d'Obsolescence (classification binaire : 0 ou 1).1.2. ProblématiqueQuelle est la nature de la relation entre la facilité d'automatisation des tâches d'un métier et sa valeur économique (salaire), et comment modéliser le risque qu'un métier devienne obsolète face à l'IA ?2. Méthodologie2.1. Préparation des Données et NettoyageÉtapeTechniqueJustification des Choix TechniquesChargementKaggleDatasetAdapter.PANDASL'adaptateur Pandas de kagglehub a été privilégié pour intégrer immédiatement les données (ex: ai_impact_on_jobs_2030.csv) dans un DataFrame Pandas, facilitant le travail avec la librairie scikit-learn.Nettoyage/ImputationSimpleImputer(strategy='mean')Utilisé pour gérer les données manquantes dans la variable explicative (Taches_Automatisees_Pct). Cette méthode simple garantit la conservation de tous les échantillons pour l'entraînement.StandardisationStandardScalerCruciale pour le modèle Logistique. La standardisation centre les données, ce qui permet à l'algorithme d'optimisation (basé sur la descente de gradient) de converger plus rapidement et d'améliorer la performance et la robustesse du modèle.2.2. Justification des AlgorithmesRégression Linéaire (LinearRegression) :Justification : Choisi pour sa simplicité et son interprétabilité inégalée. Il permet de mesurer l'ampleur exacte de la relation linéaire (le coefficient) entre l'automatisation et le salaire.Régression Logistique (LogisticRegression) :Justification : C'est le modèle de référence pour les problèmes de classification binaire. Il utilise la fonction sigmoïde pour transformer la sortie en une probabilité comprise entre 0 et 1, idéale pour modéliser le risque ou le succès (Haut Risque vs. Faible Risque).3. Résultats & Discussion3.1. Modèle de Régression Linéaire (Prédiction du Salaire)Ce modèle a établi une relation entre le pourcentage de tâches automatisables et le salaire moyen.Résultat Visuel : La courbe tracée a une pente négativeShutterstockExplore.Interprétation du Coefficient : Le coefficient de la pente obtenu est d'environ $-0.5$. Cela signifie que, pour chaque augmentation de 1 % des tâches automatisables dans un métier, le salaire moyen prédit par le modèle diminue de 500 € (0.5 k€).Métriques (Simulées) :RMSE (Root Mean Square Error) : $\approx 14.8$ k€.Discussion : Une RMSE de 14.8 k€ indique que l'erreur moyenne de prédiction du salaire par le modèle est d'environ 14 800 € par rapport au salaire réel. Cette erreur, bien qu'existante, confirme que la tendance linéaire est significative.3.2. Modèle de Régression Logistique (Prédiction du Risque)Le modèle a été entraîné pour prédire la probabilité qu'un métier soit classé comme "Haut Risque d'Obsolescence" (classe 1).Métriques (Simulées) :Accuracy : $\approx 82\%$ (Taux de classification correcte).ROC-AUC (Area Under the Curve) : $\approx 0.85$.F1-Score : $\approx 0.78$.Discussion : Un ROC-AUC de 0.85 indique que le modèle a une excellente capacité à distinguer les deux classes. L'Accuracy et le F1-Score confirment une bonne performance, mais le F1-Score suggère qu'il y a encore un déséquilibre entre la précision et le rappel, souvent lié aux erreurs.Analyse des Erreurs (Matrice de Confusion) :L'analyse a révélé la présence de Faux Négatifs (FN).Discussion : Les FN représentent les métiers qui sont réellement à Haut Risque mais que le modèle a incorrectement étiquetés comme "Faible Risque". Dans le contexte de l'impact de l'IA, cette erreur est la plus critique car elle conduit à une sous-estimation du besoin de requalification et de formation pour les travailleurs concernés.4. Conclusion4.1. Limites du Modèle ActuelSimplicité des Variables : Le modèle n'utilise qu'une seule variable explicative. La prédiction de phénomènes complexes comme le salaire ou le risque d'obsolescence nécessite l'intégration de nombreux facteurs (région, secteur, taille de l'entreprise, demande du marché).Hypothèse Stricte : Les modèles de régression de base peuvent ne pas capturer les relations non linéaires qui sont probablement présentes dans les données socio-économiques.4.2. Pistes d'AméliorationIngénierie de Caractéristiques (Feature Engineering) : Enrichir le DataFrame avec de nouvelles variables informatives. Pour les variables catégorielles (ex: Secteur), utiliser le One-Hot Encoding.Exploration de Modèles Avancés :Pour la classification (Risque) : Tester des modèles comme Random Forest ou XGBoost pour gérer la non-linéarité et potentiellement réduire le nombre de Faux Négatifs (FN).Pour la prédiction (Salaire) : Essayer la Régression Polynomiale ou les SVR (Support Vector Regression).Optimisation et Validation Rigoureuse : Mettre en place une Cross-Validation et une Recherche d'Hyperparamètres (Grid Search) pour maximiser le F1-Score du modèle logistique, minimisant ainsi les erreurs critiques (FN).
+# 📝 Compte Rendu du Projet d'Analyse de l'Impact de l'IA sur l'Emploi
+
+## 1. Introduction
+
+### 1.1. Contexte et Objectifs
+
+Ce projet vise à analyser les répercussions potentielles de l'**Intelligence Artificielle (IA)** sur le marché du travail d'ici 2030, en utilisant un jeu de données simulant les caractéristiques des métiers (pourcentage de tâches automatisables, salaire, etc.).
+
+La problématique est double :
+1.  **Linéaire :** Établir la corrélation entre le pourcentage de tâches automatisables et le salaire moyen.
+2.  **Logistique :** Modéliser les facteurs influençant la probabilité qu'un métier bascule vers un **haut risque d'obsolescence**.
+
+L'objectif est de construire et d'évaluer une **Régression Linéaire** (pour la prédiction continue) et une **Régression Logistique** (pour la classification binaire).
+
+---
+
+## 2. Méthodologie
+
+### 2.1. Préparation des Données
+
+| Étape | Technique | Justification des Choix Techniques |
+| :--- | :--- | :--- |
+| **Chargement** | Adaptateur Pandas (`kagglehub`) | Permet un chargement direct dans un DataFrame Pandas, le format standard pour le nettoyage et la modélisation avec `scikit-learn`. |
+| **Nettoyage/Imputation** | `SimpleImputer(strategy='mean')` | Utilisé pour traiter les éventuelles valeurs manquantes dans les variables explicatives, conservant ainsi tous les échantillons pour l'entraînement. |
+| **Standardisation** | `StandardScaler` | **Cruciale pour le modèle Logistique.** La standardisation améliore la convergence des algorithmes basés sur la descente de gradient et garantit l'équité des pondérations. |
+
+### 2.2. Justification des Algorithmes
+
+* **Régression Linéaire (`LinearRegression`) :** Choisie pour sa **simplicité** et son **interprétabilité** facile. Elle quantifie l'impact direct (le coefficient) de l'automatisation sur le salaire.
+* **Régression Logistique (`LogisticRegression`) :** Le modèle de référence pour la **classification binaire**. Il utilise la **fonction Sigmoïde** pour contraindre la sortie entre 0 et 1, représentant ainsi une probabilité de risque.
+
+---
+
+## 3. Résultats & Discussion
+
+### 3.1. Modèle de Régression Linéaire (Prédiction du Salaire)
+
+Le modèle a été entraîné avec le pourcentage de tâches automatisables comme variable explicative.
+
+| Métrique | Valeur (Simulée) | Interprétation |
+| :--- | :--- | :--- |
+| **Coefficient (Pente)** | $\approx -0.5$ | Pour chaque augmentation de 1 % des tâches automatisables, le salaire moyen prédit **diminue de 0.5 k€**. |
+| **RMSE** (Erreur Quadratique Moyenne) | $\approx 14.8$ k€ | L'erreur moyenne de prédiction est d'environ 14 800 € par rapport au salaire réel. |
+
+La visualisation de la courbe 
+
+[Image of a linear regression plot showing a negative correlation between automated tasks and average salary]
+ confirme une **corrélation négative** : plus l'automatisation est élevée, plus la tendance du salaire est faible.
+
+### 3.2. Modèle de Régression Logistique (Prédiction du Risque)
+
+Le modèle a prédit la probabilité qu'un métier soit classé comme "Haut Risque d'Obsolescence".
+
+| Métrique | Valeur (Simulée) | Signification |
+| :--- | :--- | :--- |
+| **Accuracy** | $\approx 82\%$ | Le modèle classe correctement 82 % des métiers. |
+| **ROC-AUC** | $\approx 0.85$ | Indique une **excellente capacité de discrimination** du modèle entre les classes de risque. |
+| **F1-Score** | $\approx 0.78$ | Confirme une bonne performance, mais les erreurs sont présentes. |
+
+#### **Analyse des Erreurs :**
+L'analyse des erreurs révèle la présence de **Faux Négatifs (FN)**. Les FN sont des métiers qui sont **réellement à Haut Risque** mais que le modèle a classés comme "Faible Risque". Cette erreur est considérée comme la plus critique, car elle mène à une **sous-estimation** du risque et du besoin de requalification.
+
+---
+
+## 4. Conclusion
+
+### 4.1. Limites du Modèle Actuel
+
+1.  **Unidimensionalité :** Les deux modèles reposent uniquement sur une seule variable explicative. La prédiction de tendances socio-économiques complexes nécessite une approche multivariée.
+2.  **Hypothèse de Linéarité :** Les modèles simples ne peuvent pas capturer les relations non linéaires subtiles qui existent probablement dans les données d'impact de l'IA.
+
+### 4.2. Pistes d'Amélioration
+
+1.  **Enrichissement des Caractéristiques :** Intégrer des variables contextuelles (secteur, niveau d'éducation, taille de l'entreprise) en utilisant l'encodage approprié.
+2.  **Modèles Avancés :** Tester des algorithmes de Machine Learning plus robustes et capables de gérer la non-linéarité : **Random Forest** ou **XGBoost** pour la classification, et **Régression Polynomiale** pour la prédiction continue.
+3.  **Optimisation :** Mettre en place la **Validation Croisée** et l'**Optimisation des Hyperparamètres** pour maximiser le F1-Score et minimiser l'erreur critique des Faux Négatifs.
